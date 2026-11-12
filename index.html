@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>알파블록스 TV</title>
+  <meta name="description" content="아이를 위한 알파블록스 파닉스 전용 플레이어">
+  <meta name="theme-color" content="#5ec8ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="알파블록스">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://i.ytimg.com">
+  <link rel="preconnect" href="https://www.youtube-nocookie.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Jua&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <!-- 하늘 배경 장식 -->
+  <div class="sky" aria-hidden="true">
+    <span class="cloud c1"></span><span class="cloud c2"></span><span class="cloud c3"></span>
+    <span class="hill h1"></span><span class="hill h2"></span>
+  </div>
+
+  <main id="app">
+    <!-- 홈 -->
+    <section id="view-home" class="view" hidden>
+      <header class="topbar">
+        <h1 class="logo" id="logo" aria-label="Alphablocks"></h1>
+        <button class="lock-btn" data-parent type="button" aria-label="부모 메뉴 (길게 누르기)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h6V7a3 3 0 0 0-6 0v3Z"/></svg>
+          <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18"/></svg>
+        </button>
+      </header>
+
+      <div class="hero">
+        <div class="hero-blocks" id="hero-blocks"></div>
+        <p class="hero-text">오늘은 어떤 블록 친구를 만날까?</p>
+        <div class="stars-total" id="stars-total"></div>
+      </div>
+
+      <div id="continue-slot"></div>
+
+      <ol class="levels" id="levels"></ol>
+    </section>
+
+    <!-- 레벨 -->
+    <section id="view-level" class="view" hidden>
+      <header class="level-head" id="level-head"></header>
+      <ol class="videos" id="videos"></ol>
+    </section>
+
+    <!-- 플레이어 -->
+    <section id="view-player" class="view" hidden>
+      <div class="stage" id="stage">
+        <div class="yt-wrap"><div id="yt"></div></div>
+        <!-- 유튜브 화면 위를 덮는 투명 보호막: 아이가 유튜브 로고/제목/추천을 누를 수 없게 함 -->
+        <div class="shield" id="shield"></div>
+
+        <div class="cover cover-loading" id="cover-loading">
+          <div class="bounce-blocks" id="loading-blocks"></div>
+          <p>블록 친구들이 오고 있어요…</p>
+        </div>
+
+        <div class="cover cover-pause" id="cover-pause" hidden>
+          <div class="pause-char" id="pause-char"></div>
+          <button class="big-play" id="big-play" type="button" aria-label="재생">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+          </button>
+          <p class="pause-title" id="pause-title"></p>
+        </div>
+
+        <div class="cover cover-end" id="cover-end" hidden>
+          <div class="confetti" id="confetti" aria-hidden="true"></div>
+          <div class="end-star" aria-hidden="true">⭐</div>
+          <h2 class="end-title">참 잘했어요!</h2>
+          <p class="end-sub" id="end-sub"></p>
+          <div class="end-actions">
+            <button class="pill-btn ghost" id="end-replay" type="button">🔁 다시 보기</button>
+            <button class="pill-btn primary" id="end-next" type="button">다음 영상 ▶</button>
+          </div>
+          <button class="pill-btn link" id="end-list" type="button">목록으로</button>
+        </div>
+
+        <div class="cover cover-error" id="cover-error" hidden>
+          <div id="error-char"></div>
+          <p>앗! 이 영상은 지금 볼 수 없어요.</p>
+          <div class="end-actions">
+            <button class="pill-btn ghost" id="error-list" type="button">목록으로</button>
+            <button class="pill-btn primary" id="error-next" type="button">다음 영상 ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls" id="controls">
+        <div class="seek">
+          <span class="time" id="t-cur">0:00</span>
+          <input type="range" id="seek" min="0" max="100" step="1" value="0" aria-label="재생 위치">
+          <span class="time" id="t-dur">0:00</span>
+        </div>
+        <div class="ctrl-row">
+          <button class="ctrl home" id="c-back" type="button" aria-label="목록으로">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-8.5Z"/></svg>
+          </button>
+          <button class="ctrl" id="c-prev" type="button" aria-label="이전 영상">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 6.2v11.6a1 1 0 0 1-1.55.83L10 12.83a1 1 0 0 1 0-1.66l8.45-5.8A1 1 0 0 1 20 6.2Z"/></svg>
+          </button>
+          <button class="ctrl play" id="c-play" type="button" aria-label="재생/일시정지">
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5Z"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.5" height="14" rx="1.5"/><rect x="13.5" y="5" width="4.5" height="14" rx="1.5"/></svg>
+          </button>
+          <button class="ctrl" id="c-next" type="button" aria-label="다음 영상">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 6.2v11.6a1 1 0 0 0 1.55.83L14 12.83a1 1 0 0 0 0-1.66L5.55 5.37A1 1 0 0 0 4 6.2Z"/></svg>
+          </button>
+          <button class="ctrl" id="c-full" type="button" aria-label="전체 화면">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4v2H6v3H4Zm11-5h4a1 1 0 0 1 1 1v4h-2V6h-3V4ZM6 15v3h3v2H5a1 1 0 0 1-1-1v-4h2Zm12 0h2v4a1 1 0 0 1-1 1h-4v-2h3v-3Z"/></svg>
+          </button>
+        </div>
+        <div class="now" id="now"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 오늘 시청 시간 끝 -->
+  <div class="timeup" id="timeup" hidden>
+    <div class="timeup-blocks" id="timeup-blocks"></div>
+    <h2>오늘은 여기까지!</h2>
+    <p>블록 친구들도 이제 코- 자러 가요.<br>내일 또 만나요 👋</p>
+    <button class="lock-btn lg" data-parent type="button" aria-label="부모 메뉴 (길게 누르기)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h6V7a3 3 0 0 0-6 0v3Z"/></svg>
+      <svg class="ring" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18"/></svg>
+    </button>
+    <small>부모님: 자물쇠를 2초간 길게 누르세요</small>
+  </div>
+
+  <!-- 부모 확인 -->
+  <dialog id="gate" aria-labelledby="gate-title">
+    <h2 id="gate-title">부모님 확인</h2>
+    <p class="gate-q" id="gate-q"></p>
+    <output class="gate-input" id="gate-input" aria-live="polite"></output>
+    <div class="keypad" id="keypad"></div>
+    <form method="dialog"><button class="pill-btn link" value="" autofocus>닫기</button></form>
+  </dialog>
+
+  <!-- 부모 설정 -->
+  <dialog id="settings" aria-labelledby="settings-title">
+    <h2 id="settings-title">부모 메뉴</h2>
+
+    <section class="set-group">
+      <h3>오늘 본 시간</h3>
+      <p class="today" id="today"></p>
+      <div class="row-btns" id="timeup-actions">
+        <button class="pill-btn ghost sm" id="add-15" type="button">+15분 더 보기</button>
+        <button class="pill-btn ghost sm" id="reset-today" type="button">오늘 시간 초기화</button>
+      </div>
+    </section>
+
+    <section class="set-group">
+      <h3>하루 시청 시간 제한</h3>
+      <div class="chips" id="limit-chips" role="radiogroup" aria-label="하루 시청 시간 제한"></div>
+    </section>
+
+    <section class="set-group">
+      <label class="switch-row"><span>영상이 끝나면 다음 영상 자동 재생</span><input type="checkbox" id="opt-autoplay" switch></label>
+      <label class="switch-row"><span>버튼 효과음</span><input type="checkbox" id="opt-sound" switch></label>
+    </section>
+
+    <section class="set-group tips">
+      <h3>더 집중하게 하는 팁</h3>
+      <ul>
+        <li><b>홈 화면에 추가</b>하면 주소창 없이 앱처럼 열려요. (Safari: 공유 → 홈 화면에 추가 / Chrome: ⋮ → 앱 설치)</li>
+        <li><b>iPhone·iPad</b>: 설정 → 손쉬운 사용 → <b>사용법 유도(Guided Access)</b>를 켜고, 앱에서 측면 버튼을 3번 누르면 다른 앱으로 못 나가요.</li>
+        <li><b>Android</b>: 설정 → 보안 → <b>앱 고정(화면 고정)</b>을 켜면 이 앱에만 머물러요.</li>
+      </ul>
+    </section>
+
+    <section class="set-group">
+      <button class="pill-btn danger sm" id="reset-all" type="button">별·시청 기록 모두 지우기</button>
+    </section>
+
+    <form method="dialog"><button class="pill-btn primary" value="close" autofocus>완료</button></form>
+  </dialog>
+</body>
+</html>
