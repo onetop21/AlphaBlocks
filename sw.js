@@ -1,5 +1,5 @@
 // 앱 화면(HTML/CSS/JS)만 캐시합니다. 영상은 항상 유튜브에서 스트리밍됩니다.
-const CACHE = 'alphablocks-tv-v2';
+const CACHE = 'alphablocks-tv-v3';
 const SHELL = [
   './',
   'index.html',
